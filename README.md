@@ -119,18 +119,22 @@ You are very welcome to contribute to this project when you find a bug, want to 
 improvement, or have an idea for a useful feature. Please find a set of guidelines at the
 [CONTRIBUTING.md](CONTRIBUTING.md) and the [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
-The current development is driven by
+**This project is currently no longer maintained but looking for new maintainers.**
+
+Applications for maintainers shall be directed to the [International Data Spaces Association](mailto:info@internationaldataspaces.org).
+
+This project was previously maintained by Fraunhofer ISST and after that by sovity GmbH.
+Please do not approach former maintainers. If you have questions, plase open an issue / discussion for the community or approach the [International Data Spaces Association](mailto:info@internationaldataspaces.org).
+
+Former maintainer, developer and contributer:
+
 * [Sebastian Opriel](https://github.com/SebastianOpriel), [sovity GmbH](http://sovity.de)
 * [Tim Berthold](https://github.com/tmberthold), [sovity GmbH](http://sovity.de)
 * [Omar Silva](https://github.com/omarsilva1), [sovity GmbH](http://sovity.de)
-
-The former core development was driven by
 * [Heinrich Pettenpohl](https://github.com/HeinrichPet), [Fraunhofer ISST](https://www.isst.fraunhofer.de/en.html), project manager
 * [Julia Pampus](https://github.com/juliapampus), [Fraunhofer ISST](https://www.isst.fraunhofer.de/en.html), lead developer
 * [Brian-Frederik Jahnke](https://github.com/brianjahnke), [Fraunhofer ISST](https://www.isst.fraunhofer.de/en.html)
 * [Ronja Quensel](https://github.com/ronjaquensel), [Fraunhofer ISST](https://www.isst.fraunhofer.de/en.html)
-
-with significant contributions, comments, and support by (in alphabetical order):
 * [Erik van den Akker](https://github.com/vdakker), [Fraunhofer ISST](https://www.isst.fraunhofer.de/en.html)
 * [Fabian Bruckner](https://github.com/fabianbruckner), [Fraunhofer ISST](https://www.isst.fraunhofer.de/en.html)
 * [Gökhan Kahriman](https://github.com/goekhanKahriman), [Fraunhofer ISST](https://www.isst.fraunhofer.de/en.html)

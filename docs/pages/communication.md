@@ -34,11 +34,6 @@ when setting up a data exchange example deployment.
 
 ---
 
-## Deployment
-
-If you are interested in a test instance of the Dataspace Connector without having to configure and run it locally,
-reach out to sovity at contact@sovity.de.
-
 ## General information on Communication
 
 Once you have a connector running it is possible to access the self-description by navigating to the connector's
