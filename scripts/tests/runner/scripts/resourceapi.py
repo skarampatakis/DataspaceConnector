@@ -178,3 +178,8 @@ class ResourceApi:
     def get_data_force_download(self, artifact):
         params = {'download': 'true'}
         return self.session.get(artifact + "/data", params=params)
+
+    def push_to_broker(self, recipient, resource):
+        params = {"recipient": recipient,
+                  "resourceId": resource}
+        return self.session.post(self.recipient + "/api/ids/resource/update", params=params)
