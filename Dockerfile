@@ -19,8 +19,8 @@ FROM maven:3-eclipse-temurin-17 AS builder
 WORKDIR /app
 COPY pom.xml .
 ## Dependencies
-RUN mvn -e -B dependency:resolve && \
-    mvn -e -B dependency:resolve-plugins
+RUN mvn -e -B dependency:resolve -Dmaven.resolver.transport=wagon -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true && \
+    mvn -e -B dependency:resolve-plugins -Dmaven.resolver.transport=wagon -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true
 ## Classes
 COPY src/main/java ./src/main/java
 COPY src/main/resources ./src/main/resources
@@ -40,7 +40,7 @@ RUN jlink \
 
 # Base image
 # hadolint ignore=DL3007
-FROM gcr.io/distroless/java-base:latest as base
+FROM gcr.io/distroless/java-base:debug as base
 ENV JAVA_HOME=/opt/java/jre
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
 COPY --from=jre-builder /jre $JAVA_HOME
