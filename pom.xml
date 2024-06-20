@@ -66,7 +66,7 @@
 		<maven.minimum.version>3.3.9</maven.minimum.version>
 
 		<!-- IDS -->
-		<ids-messaging-services.version>7.0.0</ids-messaging-services.version>
+		<ids-messaging-services.version>7.0.2</ids-messaging-services.version>
 
 		<!-- Dependencies -->
 		<springframework.version>5.3.23</springframework.version>
@@ -634,6 +634,48 @@
 
 	<repositories>
 		<repository>
+			<id>reposilite-repository-releases</id>
+			<name>Reposilite Repository</name>
+			<url>https://maven.collab-cloud.eu/releases</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>gitlab-maven</id>
+			<name>GitLab Maven Sotiris Karampatakis</name>
+			<url>https://gitlab.com/api/v4/projects/55791654/packages/maven</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>eis-ids-public</id>
+			<url>http://maven.iais.fraunhofer.de/artifactory/eis-ids-public</url>
+		</repository>
+		<repository>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>eis-snapshot-repo</id>
+			<url>http://maven.iais.fraunhofer.de/artifactory/eis-ids-public</url>
+		</repository>
+		<repository>
 			<id>sovity-public</id>
 			<url>https://pkgs.dev.azure.com/sovity/5bec6cbd-c80a-47ac-86ce-1deb26cee853/_packaging/artifact/maven/v1</url>
 		</repository>
@@ -646,28 +688,6 @@
 			<releases>
 				<enabled>true</enabled>
 			</releases>
-		</repository>
-		<repository>
-			<id>eis-ids-public</id>
-			<name>maven-snapshots</name>
-			<url>https://maven.iais.fraunhofer.de/artifactory/eis-ids-public</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<!-- exclude old IAIS http-repo from dependencies, not reachable any more -->
-		<repository>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>eis-public-repo</id>
-			<url>http://maven.iais.fraunhofer.de/artifactory/eis-ids-public</url>
 		</repository>
 	</repositories>
 

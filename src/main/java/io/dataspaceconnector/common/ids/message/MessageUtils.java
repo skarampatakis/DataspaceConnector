@@ -21,15 +21,21 @@ import de.fraunhofer.iais.eis.Message;
 import de.fraunhofer.iais.eis.RejectionMessage;
 import de.fraunhofer.iais.eis.RejectionReason;
 import de.fraunhofer.iais.eis.ResourceUpdateMessage;
+import de.fraunhofer.iais.eis.ids.jsonld.Serializer;
 import ids.messaging.common.SerializeException;
 import ids.messaging.handler.message.MessagePayload;
+import ids.messaging.protocol.multipart.parser.MultipartDatapart;
 import ids.messaging.util.InfomodelMessageBuilder;
 import io.dataspaceconnector.common.exception.ErrorMessage;
 import io.dataspaceconnector.common.exception.MessageEmptyException;
 import io.dataspaceconnector.common.exception.MessageRequestException;
+import io.dataspaceconnector.common.net.PayloadWrapper;
 import io.dataspaceconnector.common.util.Utils;
 import lombok.extern.log4j.Log4j2;
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URI;
@@ -42,6 +48,9 @@ import java.util.Map;
  */
 @Log4j2
 public final class MessageUtils {
+
+
+    private static final Serializer serializer = new Serializer();
 
     /**
      * Class constructor without params.
@@ -123,7 +132,7 @@ public final class MessageUtils {
     }
 
     /**
-     * Extract the id of an targeted element.
+     * Extract the id of a targeted element.
      *
      * @param message The ids message.
      * @return The id of the target element.
@@ -218,10 +227,43 @@ public final class MessageUtils {
     }
 
     /**
+     * Build http multipart message with a payload and an ids message as header.
+     *
+     * @param header  The ids message.
+     * @param payload The message's payload.
+     * @return A multipart body or error.
+     * @throws SerializeException if the multipart message could not be built.
+     */
+    public static MultipartBody buildIdsMultipartMessageWithFiles(final Message header, PayloadWrapper payload)
+            throws SerializeException {
+        MultipartBody.Builder builder = new MultipartBody.Builder();
+        try {
+            builder.setType(MultipartBody.FORM);
+            builder.addFormDataPart(MultipartDatapart.HEADER.toString(), serializer.serialize(header));
+            builder.addFormDataPart(MultipartDatapart.PAYLOAD.toString(), payload.getPayload());
+        }
+        catch (IOException e){
+            throw new SerializeException(e);
+        }
+        catch(NullPointerException e){
+            return buildIdsMultipartMessage(header, null);
+        }
+        try{
+            for(MultipartFile file: payload.getFiles()){
+                    builder.addFormDataPart(file.getName(), file.getOriginalFilename(), RequestBody.create(file.getBytes(), MediaType.get(file.getContentType())));
+                }
+            }
+        catch (IOException e){
+            throw new MessageRequestException(ErrorMessage.MESSAGE_BUILDING_FAILED, e);
+        }
+        return builder.build();
+    }
+
+    /**
      * Extract the header part from the ids messaging services response.
      *
      * @param message The ids response message as map.
-     * @return The ids header.
+     * @return The IDS header.
      * @throws IllegalArgumentException If the message is null.
      */
     public static String extractHeaderFromMultipartMessage(final Map<String, String> message) {
@@ -233,7 +275,7 @@ public final class MessageUtils {
      * Extract the payload part from the ids messaging services response.
      *
      * @param message The ids response message as map.
-     * @return The ids payload.
+     * @return The IDS payload.
      * @throws IllegalArgumentException If the message is null.
      */
     public static String extractPayloadFromMultipartMessage(final Map<String, String> message) {

@@ -27,12 +27,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import okhttp3.HttpUrl;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+import okhttp3.*;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -64,7 +63,7 @@ public class HttpService implements DataRetrievalService {
         GET,
         //        OPTIONS,
         //        HEAD,
-        //        POST,
+        POST,
         //        PUT,
         //        PATCH,
         //        DELETE
@@ -137,6 +136,46 @@ public class HttpService implements DataRetrievalService {
                 MediaType.get("application/octet-stream"));
 
         final var requestBuilder = new Request.Builder().url(targetUrl).post(body);
+
+        if (args.getHeaders() != null && !args.getHeaders().isEmpty()) {
+            args.getHeaders().forEach(requestBuilder::header);
+        }
+
+        final var response = httpSvc.send(requestBuilder.build());
+        final var output = getHttpResponse(response);
+        response.close();
+
+        return output;
+    }
+
+    public Response post(final URL target, final HttpArgs args, final List<MultipartFile> files)
+            throws IOException {
+        validateParameter(target, args);
+
+        final var urlBuilder = createUrlBuilder(target);
+
+        if (args.getParams() != null) {
+            for (final var key : args.getParams().keySet()) {
+                urlBuilder.addQueryParameter(key, args.getParams().get(key));
+            }
+        }
+
+        final var targetUrl = urlBuilder.build();
+        MultipartBody.Builder builder = new MultipartBody.Builder();
+        builder.setType(MultipartBody.FORM);
+        for(MultipartFile file:files){
+            builder.addFormDataPart(
+                    file.getName(),
+                    file.getOriginalFilename(),
+                    RequestBody.create(
+                            file.getBytes(),
+                            MediaType.get(file.getContentType()
+                            )
+                    )
+            );
+        }
+
+        final var requestBuilder = new Request.Builder().url(targetUrl).post(builder.build());
 
         if (args.getHeaders() != null && !args.getHeaders().isEmpty()) {
             args.getHeaders().forEach(requestBuilder::header);
@@ -250,6 +289,38 @@ public class HttpService implements DataRetrievalService {
         final var url = (input == null) ? buildTargetUrl(target, null)
                 : buildTargetUrl(target, input.getOptional());
         return this.get(url, toArgs(input, auth));
+    }
+
+    /**
+     * Perform a post request.
+     *
+     * @param target The recipient of the request.
+     * @param input  The query inputs.
+     * @return The response.
+     * @throws IOException if the request failed.
+     */
+    @Override
+    public Response post(final URL target, final QueryInput input, final List<? extends HttpAuthentication> auth) throws IOException {
+        final var url = (input == null) ? buildTargetUrl(target, null)
+                : buildTargetUrl(target, input.getOptional());
+        if (input != null){
+            if(!input.getFiles().isEmpty()){
+                return this.post(url, toArgs(input, auth), input.getFiles());
+            }
+        }
+        return this.post(url, toArgs(input, auth), InputStream.nullInputStream());
+    }
+
+    @Override
+    public Response post(final URL target, final QueryInput input) throws IOException {
+        final var url = (input == null) ? buildTargetUrl(target, null)
+                : buildTargetUrl(target, input.getOptional());
+        if (input != null){
+            if(!input.getFiles().isEmpty()){
+                return this.post(url, toArgs(input), input.getFiles());
+            }
+        }
+        return this.post(url, toArgs(input), InputStream.nullInputStream());
     }
 
     private URL buildTargetUrl(final URL target, final String optional) {

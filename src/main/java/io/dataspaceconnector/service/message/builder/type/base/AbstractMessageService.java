@@ -35,6 +35,7 @@ import io.dataspaceconnector.common.exception.MessageResponseException;
 import io.dataspaceconnector.common.ids.ConnectorService;
 import io.dataspaceconnector.common.ids.DeserializationService;
 import io.dataspaceconnector.common.ids.message.MessageUtils;
+import io.dataspaceconnector.common.net.PayloadWrapper;
 import io.dataspaceconnector.model.message.MessageDesc;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -104,7 +105,12 @@ public abstract class AbstractMessageService<D extends MessageDesc> {
      */
     protected MultipartBody buildMultipartBody(final Message header, final Object payload)
             throws SerializeException {
-        return MessageUtils.buildIdsMultipartMessage(header, payload);
+        try {
+            return MessageUtils.buildIdsMultipartMessageWithFiles(header, (PayloadWrapper) payload);
+        }
+        catch (ClassCastException e){
+            return MessageUtils.buildIdsMultipartMessage(header, payload);
+        }
     }
 
     /**

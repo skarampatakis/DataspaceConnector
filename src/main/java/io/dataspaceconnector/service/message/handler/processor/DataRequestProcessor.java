@@ -24,6 +24,7 @@ import io.dataspaceconnector.common.net.QueryInput;
 import io.dataspaceconnector.model.message.ArtifactResponseMessageDesc;
 import io.dataspaceconnector.service.EntityResolver;
 import io.dataspaceconnector.service.message.builder.type.ArtifactResponseService;
+import io.dataspaceconnector.service.message.handler.dto.RequestWithFiles;
 import io.dataspaceconnector.service.message.handler.dto.Response;
 import io.dataspaceconnector.service.message.handler.dto.RouteMsg;
 import io.dataspaceconnector.service.message.handler.processor.base.IdsProcessor;
@@ -34,6 +35,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Fetches the data of an artifact as the response to an ArtifactRequestMessage.
@@ -73,6 +79,8 @@ class DataRequestProcessor extends IdsProcessor<
         final var transferContract = MessageUtils.extractTransferContract(msg.getHeader());
 
         final var queryInput = getQueryInputFromPayload(msg.getBody());
+        queryInput.setFiles(getQueryInputFiles((RequestWithFiles) msg));
+        queryInput.getHeaders().put("X-DSC-Issuer", issuer.toString());
         final var data = entityResolver.getDataByArtifactId(artifact, queryInput);
 
         final var desc = new ArtifactResponseMessageDesc(issuer, messageId, transferContract);
@@ -105,6 +113,13 @@ class DataRequestProcessor extends IdsProcessor<
             }
             throw new InvalidInputException("Invalid query input.", e);
         }
+    }
+
+    private List<MultipartFile> getQueryInputFiles(final RequestWithFiles msg){
+        List<MultipartFile> files = new ArrayList<>();
+        MultiValueMap<String, MultipartFile> requestFiles = (MultiValueMap<String, MultipartFile>) msg.getFiles();
+        if(requestFiles != null) requestFiles.forEach((s, multipartFiles) -> files.add(multipartFiles.get(0)));
+        return files;
     }
 
 }

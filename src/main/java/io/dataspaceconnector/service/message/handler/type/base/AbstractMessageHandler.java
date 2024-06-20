@@ -21,14 +21,14 @@ package io.dataspaceconnector.service.message.handler.type.base;
 
 import de.fraunhofer.iais.eis.Message;
 import de.fraunhofer.iais.eis.RejectionReason;
-import ids.messaging.handler.message.MessageAndClaimsHandler;
+import ids.messaging.handler.message.MessageFilesAndClaimsHandler;
 import ids.messaging.handler.message.MessagePayload;
 import ids.messaging.response.BodyResponse;
 import ids.messaging.response.ErrorResponse;
 import ids.messaging.response.MessageResponse;
 import io.dataspaceconnector.common.ids.ConnectorService;
 import io.dataspaceconnector.extension.telemetry.CustomOpenTelemetry;
-import io.dataspaceconnector.service.message.handler.dto.Request;
+import io.dataspaceconnector.service.message.handler.dto.RequestWithFiles;
 import io.dataspaceconnector.service.message.handler.dto.Response;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -40,6 +40,8 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.ExchangeBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -52,7 +54,7 @@ import java.util.Optional;
  */
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractMessageHandler<T extends Message>
-        implements MessageAndClaimsHandler<T> {
+        implements MessageFilesAndClaimsHandler<T> {
 
     /**
      * Template for triggering Camel routes.
@@ -81,13 +83,13 @@ public abstract class AbstractMessageHandler<T extends Message>
      */
     public MessageResponse handleMessage(final T message,
                                          final MessagePayload payload,
-                                         final Optional<Jws<Claims>> claims)
+                                         final Optional<Jws<Claims>> claims, MultiValueMap<String, MultipartFile> files)
             throws RuntimeException {
         Optional<Span> span = startSpan(message);
         try {
             final var result = template.send(getHandlerRouteDirect(),
                     ExchangeBuilder.anExchange(context)
-                            .withBody(new Request<>(message, payload, claims))
+                            .withBody(new RequestWithFiles<>(message, payload, claims, files))
                             .build());
 
             final var response = result.getIn().getBody(Response.class);

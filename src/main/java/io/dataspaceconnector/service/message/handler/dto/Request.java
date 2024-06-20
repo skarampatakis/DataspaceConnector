@@ -18,6 +18,7 @@ package io.dataspaceconnector.service.message.handler.dto;
 import de.fraunhofer.iais.eis.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Implementation of the {@link RouteMsg} interface for requests.
@@ -31,6 +32,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor(force = true)
 public class Request<H extends Message, B, C> implements RouteMsg<H, B> {
     /**
      * The header.

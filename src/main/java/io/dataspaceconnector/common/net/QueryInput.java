@@ -15,11 +15,17 @@
  */
 package io.dataspaceconnector.common.net;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
+import io.dataspaceconnector.common.net.HttpService.Method;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Query for a backend.
@@ -62,5 +68,8 @@ public class QueryInput {
      * Path extending the base path of an api request.
      */
     private String optional;
+
+    @JsonIgnore
+    private List<MultipartFile> files = new ArrayList<>();
 
 }

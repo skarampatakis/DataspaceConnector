@@ -30,6 +30,7 @@ import io.dataspaceconnector.common.exception.UnexpectedResponseException;
 import io.dataspaceconnector.common.ids.DeserializationService;
 import io.dataspaceconnector.common.ids.message.ClearingHouseService;
 import io.dataspaceconnector.common.ids.message.MessageUtils;
+import io.dataspaceconnector.common.net.PayloadWrapper;
 import io.dataspaceconnector.common.net.QueryInput;
 import io.dataspaceconnector.common.util.Utils;
 import io.dataspaceconnector.model.message.ArtifactRequestMessageDesc;
@@ -136,10 +137,11 @@ public final class ArtifactRequestService
     public Map<String, String> sendMessage(final URI recipient, final URI elementId,
                                            final URI agreementId, final QueryInput queryInput)
             throws MessageException, MessageResponseException, UnexpectedResponseException {
-        String payload = "";
+        PayloadWrapper payload = new PayloadWrapper();
         if (queryInput != null) {
             try {
-                payload = new ObjectMapper().writeValueAsString(queryInput);
+                payload.setPayload(new ObjectMapper().writeValueAsString(queryInput));
+                payload.setFiles(queryInput.getFiles());
             } catch (JsonProcessingException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Failed to parse query. Loading everything. "

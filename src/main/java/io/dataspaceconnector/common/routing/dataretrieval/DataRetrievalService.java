@@ -52,4 +52,28 @@ public interface DataRetrievalService {
     Response get(URL target, QueryInput input, List<? extends HttpAuthentication> auth)
             throws IOException, DataRetrievalException;
 
+
+    /**
+     * Retrieves the data using POST method.
+     *
+     * @param target The target URL.
+     * @param input The query input.
+     * @return The data as a response.
+     * @throws IOException if an IO error occurs.
+     * @throws DataRetrievalException if any other error occurs.
+     */
+    Response post(URL target, QueryInput input) throws IOException, DataRetrievalException;
+
+    /**
+     * Retrieves the data using authentication and the POST method.
+     *
+     * @param target The target URL.
+     * @param input The query input.
+     * @param auth The list of authentications.
+     * @return The data as a response.
+     * @throws IOException if an IO error occurs.
+     * @throws DataRetrievalException if any other error occurs.
+     */
+    Response post(URL target, QueryInput input, List<? extends HttpAuthentication> auth)
+            throws IOException, DataRetrievalException;
 }

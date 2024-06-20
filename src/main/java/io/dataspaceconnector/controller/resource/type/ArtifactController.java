@@ -53,15 +53,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -70,6 +63,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -155,6 +149,56 @@ public class ArtifactController extends BaseResourceNotificationController<Artif
         if (!optional.isBlank()) {
             queryInput.setOptional(optional);
         }
+
+        /*
+            If no agreement information has been passed the connector needs
+            to check if the data access is restricted by the usage control.
+         */
+        final var data = (agreementUri == null)
+                ? artifactSvc.getData(accessVerifier, dataReceiver, artifactId, queryInput,
+                routeIds)
+                : artifactSvc.getData(accessVerifier, dataReceiver, artifactId,
+                new RetrievalInformation(agreementUri, download, queryInput), routeIds);
+
+        return returnData(artifactId, data);
+    }
+
+    @PostMapping("{id}/data/**")
+    @Operation(summary = "Get data by artifact id with query input using the POST Method. Used by services.")
+    @ApiResponse(responseCode = ResponseCode.OK, description = ResponseDescription.OK)
+    @TelemetrySpan(name = "POST /api/artifacts/{id}/data/**")
+    public ResponseEntity<StreamingResponseBody> postData(
+            @Valid @PathVariable(name = "id") final UUID artifactId,
+            @RequestParam(required = false) final Boolean download,
+            @RequestParam(required = false) final URI agreementUri,
+            @RequestParam(required = false) final List<URI> routeIds,
+            @RequestParam(required = false) final Map<String, String> params,
+            @RequestHeader final Map<String, String> headers,
+            @RequestParam(required = false) final Map<String, MultipartFile> files,
+            final HttpServletRequest request) throws IOException {
+        headers.remove("authorization");
+        headers.remove("host");
+
+        List<MultipartFile> parts = new ArrayList<>();
+        files.forEach((s, multipartFile) -> {parts.add(multipartFile);});
+        final var queryInput = new QueryInput();
+        queryInput.setParams(params);
+        //user can define the method on the query using the proxyMethod parameter, defaults to POST if none set
+        if (!queryInput.getParams().containsKey("proxyMethod")) queryInput.getParams().put("proxyMethod", "POST");
+        queryInput.setHeaders(headers);
+        queryInput.setFiles(parts);
+
+        final var searchString = "/data";
+        var optional = request.getRequestURI().substring(
+                request.getRequestURI().indexOf(searchString) + searchString.length());
+        if ("/**".equals(optional)) {
+            optional = "";
+        }
+
+        if (!optional.isBlank()) {
+            queryInput.setOptional(optional);
+        }
+
 
         /*
             If no agreement information has been passed the connector needs

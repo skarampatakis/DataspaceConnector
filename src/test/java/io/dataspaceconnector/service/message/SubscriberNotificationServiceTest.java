@@ -15,6 +15,7 @@
  */
 package io.dataspaceconnector.service.message;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,7 +125,7 @@ class SubscriberNotificationServiceTest {
 
         /* ASSERT */
         verify(routeDataDispatcher, times(1)).send(any(), any(), any());
-        verify(httpService, times(1)).post(any(), any(), any());
+        verify(httpService, times(1)).post(any(), any(), (InputStream) any());
     }
 
     private Subscription getSubscription(final URI location) {

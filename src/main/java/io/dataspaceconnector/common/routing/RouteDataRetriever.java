@@ -99,4 +99,16 @@ public class RouteDataRetriever implements DataRetrievalService {
         throw new NotImplemented();
     }
 
+    @Override
+    public Response post(final URL target, final QueryInput input)
+            throws DataRetrievalException {
+        throw new NotImplemented();
+    }
+
+    @Override
+    public Response post(final URL target, final QueryInput input, final List<? extends HttpAuthentication> auth)
+            throws DataRetrievalException {
+        throw new NotImplemented();
+    }
+
 }

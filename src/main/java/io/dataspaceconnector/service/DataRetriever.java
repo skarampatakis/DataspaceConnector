@@ -24,6 +24,7 @@ import io.dataspaceconnector.common.exception.UnreachableLineException;
 import io.dataspaceconnector.common.net.ApiReferenceHelper;
 import io.dataspaceconnector.common.net.HttpAuthentication;
 import io.dataspaceconnector.common.net.HttpService;
+import io.dataspaceconnector.common.net.HttpService.Method;
 import io.dataspaceconnector.common.net.QueryInput;
 import io.dataspaceconnector.common.routing.RouteDataRetriever;
 import io.dataspaceconnector.common.routing.dataretrieval.DataRetrievalService;
@@ -149,15 +150,30 @@ public class DataRetriever {
         if (apiReferenceHelper.isRouteReference(data.getAccessUrl())) {
             backendData = getData(routeRetriever, data.getAccessUrl(), queryInput);
         } else {
-            if (!data.getAuthentication().isEmpty()) {
-                backendData = getData(httpSvc, data.getAccessUrl(), queryInput,
-                        data.getAuthentication());
-            } else {
-                backendData = getData(httpSvc, data.getAccessUrl(), queryInput);
-            }
+                Method proxyMethod = getMethod(queryInput);
+                if(proxyMethod.equals(Method.POST)){
+                    backendData = postData(httpSvc, data.getAccessUrl(), queryInput,
+                            data.getAuthentication());
+                } else {
+                    backendData = getData(httpSvc, data.getAccessUrl(), queryInput,
+                            data.getAuthentication());
+                }
         }
 
         return backendData;
+    }
+
+    private InputStream postData(final DataRetrievalService service, final URL target, final QueryInput queryInput)
+            throws IOException, DataRetrievalException {
+        return service.post(target, queryInput).getData();
+    }
+
+
+    private InputStream postData(final DataRetrievalService service, final URL target,
+                                final QueryInput queryInput,
+                                final List<? extends HttpAuthentication> authentications)
+            throws IOException, DataRetrievalException {
+        return service.post(target, queryInput, authentications).getData();
     }
 
     private InputStream getData(final DataRetrievalService service, final URL target,
@@ -171,6 +187,20 @@ public class DataRetriever {
                                 final List<? extends HttpAuthentication> authentications)
             throws IOException, DataRetrievalException {
         return service.get(target, queryInput, authentications).getData();
+    }
+
+    private Method getMethod(final QueryInput queryInput){
+        if(queryInput!=null){
+            String proxyMethodParameterValue = queryInput.getParams().getOrDefault("proxyMethod","GET");
+            switch(proxyMethodParameterValue){
+                case "POST":
+                    return Method.POST;
+                case "GET":
+                default:
+                    return Method.GET;
+            }
+        }
+        else return Method.GET;
     }
 
 }
